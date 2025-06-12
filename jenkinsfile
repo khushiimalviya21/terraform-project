@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_DEFAULT_REGION = "ap-south-1"
+    }
+
+    stages {
+        stage('Checkout Terraform Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/khushiimalviya21/terraform-project.git'
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                sh 'terraform init'
+            }
+        }
+
+        stage('Terraform Validate') {
+            steps {
+                sh 'terraform validate'
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                sh 'terraform plan -out=tfplan'
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                input message: "Do you want to apply the Terraform plan?"
+                sh 'terraform apply tfplan'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Jenkins Terraform pipeline finished.'
+        }
+    }
+}
